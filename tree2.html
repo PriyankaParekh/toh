@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic Tree Structure</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+        margin: auto;
+      }
+    </style>
+    <!-- <script src="./index.js"></script> -->
+  </head>
+  <body>
+    <canvas id="treeCanvas"></canvas>
+    <button onclick="getDataFromServer()">Get Data from Server</button>
+    <div id="dataContainer"></div>
+
+    <script>
+      // Get canvas element and context
+      const canvas = document.getElementById("treeCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // Define tree data
+      const treeData = {
+        name: "Beverages",
+        children: [
+          {
+            name: "Water",
+          },
+          {
+            name: "Coffee",
+          },
+          {
+            name: "Tea",
+            children: [
+              {
+                name: "Black Tea",
+              },
+              {
+                name: "White Tea",
+              },
+              {
+                name: "Green Tea",
+                children: [
+                  {
+                    name: "Sencha",
+                  },
+                  {
+                    name: "Gyokuro",
+                  },
+                  {
+                    name: "Matcha",
+                  },
+                  {
+                    name: "Pi Lo Chun",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      // Function to calculate tree width
+      function calculateTreeWidth(node) {
+        let width = nodeWidth;
+        if (node.children) {
+          node.children.forEach((child) => {
+            width += calculateTreeWidth(child);
+          });
+        }
+        return Math.max(width, nodeWidth);
+      }
+
+      // Function to calculate tree height
+      function calculateTreeHeight(node) {
+        let height = nodeHeight;
+        if (node.children) {
+          let maxHeight = 0;
+          node.children.forEach((child) => {
+            maxHeight = Math.max(maxHeight, calculateTreeHeight(child));
+          });
+          height += maxHeight + verticalSpacing;
+        }
+        return height;
+      }
+
+      // Define constants for drawing
+      const nodeWidth = 100;
+      const nodeHeight = 40;
+      const horizontalSpacing = 50;
+      let verticalSpacing = 70;
+
+      // Calculate canvas width and height
+      const treeWidth = calculateTreeWidth(treeData);
+      let treeHeight = calculateTreeHeight(treeData);
+
+      // Adjust vertical spacing based on tree depth
+      const maxDepth = getMaxDepth(treeData);
+      verticalSpacing = Math.max(verticalSpacing, maxDepth * 20);
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // Function to get maximum depth of the tree
+      function getMaxDepth(node) {
+        if (!node.children || node.children.length === 0) {
+          return 0;
+        } else {
+          return 1 + Math.max(...node.children.map(getMaxDepth));
+        }
+      }
+
+      // Function to draw a node
+      function drawNode(x, y, text) {
+        ctx.fillStyle = "white";
+        ctx.fillRect(x, y, nodeWidth, nodeHeight);
+        ctx.strokeStyle = "black";
+        ctx.strokeRect(x, y, nodeWidth, nodeHeight);
+        ctx.fillStyle = "black";
+        ctx.fillText(text, x + 10, y + 25);
+      }
+
+      // Function to draw a tree recursively
+      function drawTree(node, x, y, level) {
+        drawNode(x, y, node.root);
+        if (node.children) {
+          const numChildren = node.children.length;
+          const startX = x - (numChildren * nodeWidth) / 2 + nodeWidth / 2;
+          const startY = y + verticalSpacing * (level + 1);
+          for (let i = 0; i < numChildren; i++) {
+            const child = node.children[i];
+            const childX = startX + i * (nodeWidth + horizontalSpacing);
+            const childY = startY;
+            drawTree(child, childX, childY, level + 1);
+            ctx.beginPath();
+            ctx.moveTo(x + nodeWidth / 2, y + nodeHeight);
+            ctx.lineTo(childX + nodeWidth / 2, childY);
+            ctx.stroke();
+          }
+        }
+      }
+
+      async function getDataFromServer() {
+        try {
+          const response = await fetch("http://localhost:5000/getData"); // Assuming your server exposes an endpoint to fetch data
+          console.log(response);
+          const data = await response.json();
+          console.log(data);
+          data.forEach((treeData, index) => {
+            drawTree(
+              treeData,
+              (canvas.width / (data.length + 1)) * (index + 1),
+              20,
+              0
+            );
+          });
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+
+      getDataFromServer();
+    </script>
+  </body>
+</html>

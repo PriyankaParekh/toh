@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dynamic Binary Tree with Heap Sort</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <style>
+    canvas {
+      display: block;
+      padding: 10px;
+      margin: auto;
+      margin-left: -3rem;
+    }
+
+    .node {
+        width: 40px;
+      height: 40px;
+      background-color: lightblue;
+      border: 1px solid #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="row justify-content-center align-items-center">
+      <div class="col-auto">
+        <input type="number" placeholder="Enter Number" id="nodeValue" class="form-control">
+      </div>
+      <div class="col-auto">
+        <button id="addNodeButton" class="btn btn-primary mt-2">Add Node</button>
+      </div>
+      <div class="col-auto">
+        <button id="sortButton" class="btn btn-warning mt-2">Sort Tree</button>
+      </div>
+      <div class="col-auto">
+        <button id="clearStorageButton" class="btn btn-danger mt-2">Clear Storage</button>
+      </div>
+    </div>
+    <canvas id="treeCanvas"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+ 
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const treeCanvas = document.getElementById("treeCanvas");
+      const ctx = treeCanvas.getContext("2d");
+      let rootNode = null;
+      let nodes = [];
+
+      const setCanvasSize = () => {
+        treeCanvas.width = window.innerWidth * 0.8;
+        treeCanvas.height = window.innerHeight * 0.8;
+        if (rootNode) {
+          clearAndRender();
+        }
+      };
+      setCanvasSize();
+      window.addEventListener("resize", setCanvasSize);
+
+      const clearAndRender = () => {
+        ctx.clearRect(0, 0, treeCanvas.width, treeCanvas.height);
+        renderTree(rootNode, treeCanvas.width / 2, 50, 0);
+      };
+      const renderTree = (node, x, y, level, renderedNodes = new Set()) => {
+        
+        if (node === null || renderedNodes.has(node)) return;
+
+        const nodeSize = 50;
+
+        ctx.fillStyle = "#ccfafa";
+        ctx.fillRect(x - nodeSize / 2, y - nodeSize / 2, nodeSize, nodeSize);
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(x - nodeSize / 2, y - nodeSize / 2, nodeSize, nodeSize);
+
+        ctx.fillStyle = "#000";
+        ctx.font = "bold 16px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(node.value, x, y);
+
+        renderedNodes.add(node);
+
+        const xOffset = 100;
+        const yOffset = 80;
+
+        if (node.left) {
+          ctx.beginPath();
+          ctx.moveTo(x, y + nodeSize / 2);
+          ctx.lineTo(x - xOffset, y + yOffset - nodeSize / 2);
+          ctx.stroke();
+          ctx.closePath();
+          renderTree(
+            node.left,
+            x - xOffset,
+            y + yOffset,
+            level + 1,
+            renderedNodes
+          );
+        }
+
+        if (node.right) {
+          ctx.beginPath();
+          ctx.moveTo(x, y + nodeSize / 2);
+          ctx.lineTo(x + xOffset, y + yOffset - nodeSize / 2);
+          ctx.stroke();
+          ctx.closePath();
+          renderTree(
+            node.right,
+            x + xOffset,
+            y + yOffset,
+            level + 1,
+            renderedNodes
+          );
+        }
+      };
+
+      const addNode = () => {
+        const inputValue = document.getElementById("nodeValue").valueAsNumber;
+        if (!isNaN(inputValue)) {
+          const newNode = { value: inputValue, left: null, right: null };
+
+          if (rootNode === null) {
+            rootNode = newNode;
+            nodes.push(newNode);
+          } else {
+            let currentLevelNodes = [rootNode];
+            let nextLevelNodes = [];
+
+            while (currentLevelNodes.length > 0) {
+              const currentNode = currentLevelNodes.shift();
+
+              if (currentNode.left === null) {
+                currentNode.left = newNode;
+                nodes.push(newNode);
+                break;
+              } else {
+                nextLevelNodes.push(currentNode.left);
+              }
+
+              if (currentNode.right === null) {
+                currentNode.right = newNode;
+                nodes.push(newNode);
+                break;
+              } else {
+                nextLevelNodes.push(currentNode.right);
+              }
+
+              if (currentLevelNodes.length === 0) {
+                currentLevelNodes = nextLevelNodes;
+                nextLevelNodes = [];
+              }
+            }
+          }
+
+          clearAndRender();
+          saveTree();
+        }
+      };
+
+      const heapify = (array, n, i) => {
+        let largest = i;
+        const left = 2 * i + 1;
+        const right = 2 * i + 2;
+
+        if (left < n && array[left].value > array[largest].value) {
+          largest = left;
+        }
+
+        if (right < n && array[right].value > array[largest].value) {
+          largest = right;
+        }
+
+        if (largest !== i) {
+          [array[i], array[largest]] = [array[largest], array[i]];
+          heapify(array, n, largest);
+        }
+      };
+
+      const sortTree = () => {
+        const flattenTree = (node, array) => {
+          if (node === null) return;
+          flattenTree(node.left, array);
+          array.push(node.value);
+          flattenTree(node.right, array);
+        };
+
+        const rebuildTree = (node, array, index) => {
+          if (index >= array.length) return null;
+
+          node = { value: array[index], left: null, right: null };
+
+          node.left = rebuildTree(node.left, array, 2 * index + 1);
+          node.right = rebuildTree(node.right, array, 2 * index + 2);
+
+          return node;
+        };
+
+        let sortedValues = [];
+        flattenTree(rootNode, sortedValues);
+        sortedValues.sort((a, b) => a - b);
+        rootNode = rebuildTree(rootNode, sortedValues, 0);
+
+        clearAndRender();
+        saveTree();
+      };
+
+      const saveTree = () => {
+        localStorage.setItem("binaryTree", JSON.stringify(rootNode));
+      };
+
+      const loadTree = () => {
+        const savedTree = localStorage.getItem("binaryTree");
+        if (savedTree) {
+          rootNode = JSON.parse(savedTree);
+          clearAndRender();
+        }
+      };
+
+      const clearStorage = () => {
+        localStorage.removeItem("binaryTree");
+        rootNode = null;
+        clearAndRender();
+      };
+
+      document
+        .getElementById("addNodeButton")
+        .addEventListener("click", addNode);
+      document
+        .getElementById("sortButton")
+        .addEventListener("click", sortTree);
+      document
+        .getElementById("clearStorageButton")
+        .addEventListener("click", clearStorage);
+
+      loadTree();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Tree Structure</title>
+<style>
+  canvas {
+    border: 1px solid black;
+    display: block;
+    margin: auto;
+  }
+</style>
+</head>
+<body>
+<canvas id="treeCanvas"></canvas>
+
+<script>
+// Get canvas element and context
+const canvas = document.getElementById('treeCanvas');
+const ctx = canvas.getContext('2d');
+
+// Define tree data
+const treeData = {
+  name: 'Beverages',
+  children: [
+    {
+      name: 'Water'
+    },
+    {
+      name: 'Coffee'
+    },
+    {
+      name: 'Tea',
+      children: [
+        {
+          name: 'Black Tea'
+        },
+        {
+          name: 'White Tea'
+        },
+        {
+          name: 'Green Tea',
+          children: [
+            {
+              name: 'Sencha'
+            },
+            {
+              name: 'Gyokuro'
+            },
+            {
+              name: 'Matcha'
+            },
+            {
+              name: 'Pi Lo Chun'
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+// Function to calculate tree width
+function calculateTreeWidth(node) {
+  let width = nodeWidth;
+  if (node.children) {
+    node.children.forEach(child => {
+      width += calculateTreeWidth(child);
+    });
+  }
+  return Math.max(width, nodeWidth);
+}
+
+// Function to calculate tree height
+function calculateTreeHeight(node) {
+  let height = nodeHeight;
+  if (node.children) {
+    node.children.forEach(child => {
+      height = Math.max(height, nodeHeight + calculateTreeHeight(child));
+    });
+  }
+  return height;
+}
+
+// Define constants for drawing
+const nodeWidth = 220;
+const nodeHeight = 55;
+const horizontalSpacing = 30;
+const verticalSpacing = 70;
+
+// Calculate canvas width and height
+const treeWidth = calculateTreeWidth(treeData);
+const treeHeight = calculateTreeHeight(treeData);
+canvas.width = treeWidth;
+canvas.height = treeHeight + verticalSpacing;
+
+// Function to draw a node
+function drawNode(x, y, text) {
+  ctx.fillStyle = 'lightblue';
+  ctx.fillRect(x, y, nodeWidth, nodeHeight);
+  ctx.strokeStyle = 'black';
+  ctx.strokeRect(x, y, nodeWidth, nodeHeight);
+  ctx.fillStyle = 'black';
+  ctx.fillText(text, x + 10, y + 25);
+}
+
+// Function to draw a tree recursively
+function drawTree(node, x, y) {
+  drawNode(x, y, node.name);
+  if (node.children) {
+    const numChildren = node.children.length;
+    console.log(numChildren);
+    const startX = x - ((numChildren * nodeWidth) / 2) + (nodeWidth / 2);
+    const startY = y + verticalSpacing;
+    for (let i = 0; i < numChildren; i++) {
+      const child = node.children[i];
+      const childX = startX + i * (nodeWidth + horizontalSpacing);
+      const childY = startY;
+      drawTree(child, childX, childY);
+      ctx.beginPath();
+      ctx.moveTo(x + nodeWidth / 2, y + nodeHeight);
+      ctx.lineTo(childX + nodeWidth / 2, childY);
+      ctx.stroke();
+    }
+  }
+}
+
+// Start drawing the tree
+drawTree(treeData, canvas.width / 2, 20);
+</script>
+</body>
+</html>

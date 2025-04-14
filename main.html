@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tree</title>
+    <style>
+      /* CSS styles for the tree structure */
+      .tree-container {
+        display: flex;
+        justify-content: center;
+      }
+
+      .tree,
+      .tree ul,
+      .tree li {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        position: relative;
+      }
+
+      .tree {
+        text-align: center;
+      }
+
+      .tree,
+      .tree ul {
+        display: table;
+      }
+
+      .tree ul {
+        width: 100%;
+      }
+
+      .tree li {
+        display: table-cell;
+        padding: 0.5em 0;
+        vertical-align: top;
+      }
+
+      .tree li:before {
+        outline: solid 1px #666;
+        content: "";
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+
+      .tree li:first-child:before {
+        left: 50%;
+      }
+
+      .tree li:last-child:before {
+        right: 50%;
+      }
+
+      .tree code,
+      .tree span {
+        border: solid 0.1em #666;
+        border-radius: 0.2em;
+        background: #ccfafa;
+        display: inline-block;
+        margin: 0 0.2em 0.5em;
+        padding: 1.2em 1.5em;
+        position: relative;
+      }
+
+      .tree ul:before,
+      .tree code:before,
+      .tree span:before {
+        outline: solid 1px #666;
+        content: "";
+        height: 0.5em;
+        left: 50%;
+        position: absolute;
+      }
+
+      .tree ul:before {
+        top: -0.5em;
+      }
+
+      .tree code:before,
+      .tree span:before {
+        top: -0.55em;
+      }
+
+      .tree > li {
+        margin-top: 0;
+      }
+
+      .tree > li:before,
+      .tree > li:after,
+      .tree > li > code:before,
+      .tree > li > span:before {
+        outline: none;
+      }
+
+      /* CSS styles for buttons */
+      .btn {
+        padding: 0.8em;
+        margin-top: 0.5em;
+        margin-right: 0.5em;
+        font-weight: 900;
+        border: 0.5px solid #9f9e9e;
+        cursor: pointer;
+        color: #000;
+        border-radius: 5px;
+        background-color: aliceblue;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tree-container">
+      <div class="">
+        <!-- Tree structure -->
+        <ul class="tree" id="tree">
+          <li>
+            <span>Electronics</span>
+            <ul>
+              <li>
+                <span>Smartphones</span>
+                <ul>
+                  <li>
+                    <span>iPhone</span>
+                    <ul>
+                      <li><span>iPhone 13</span></li>
+                      <li><span>iPhone SE</span></li>
+                    </ul>
+                  </li>
+                  <li>
+                    <span>Samsung</span>
+                    <ul>
+                      <li><span>Galaxy S21</span></li>
+                      <li><span>Galaxy Note 20</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <span>Laptops</span>
+                <ul>
+                  <li>
+                    <span>Apple</span>
+                    <ul>
+                      <li><span>MacBook Pro</span></li>
+                      <li><span>MacBook Air</span></li>
+                    </ul>
+                  </li>
+                  <li>
+                    <span>Microsoft</span>
+                    <ul>
+                      <li><span>Surface Laptop</span></li>
+                      <li><span>Surface Book</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <span>TVs</span>
+                <ul>
+                  <li>
+                    <span>Sony</span>
+                  </li>
+                  <li>
+                    <span>samsung</span>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Script for adding functionality to the tree -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Function to save tree structure to localStorage
+        // window.location.reload();
+        function saveTree() {
+          localStorage.setItem(
+            "tree",
+            JSON.stringify(document.getElementById("tree").innerHTML)
+          );
+        }
+
+        // Function to load tree structure from localStorage
+        function loadTree() {
+          const savedTree = localStorage.getItem("tree");
+          if (savedTree) {
+            document.getElementById("tree").innerHTML = JSON.parse(savedTree);
+          }
+        }
+
+        // Load saved tree structure on page load
+        loadTree();
+
+        // Get all tree nodes
+        // const treeNodes = document.querySelectorAll(".tree span") || document.querySelectorAll(".pri");
+        const treeNodes = document.querySelectorAll(".tree span, .pri");
+        // Add click event listener to each tree node
+        treeNodes.forEach((node) => {
+          node.addEventListener("click", function (event) {
+            // Remove any existing button groups
+            const existingBtnGroups = document.querySelectorAll(".btn-group");
+            existingBtnGroups.forEach((group) => group.remove());
+
+            if (event.target.textContent === "Electronics") {
+              // Create button group for add option only
+              const btnGroup = document.createElement("div");
+              btnGroup.classList.add("btn-group");
+
+              // Add button for add option
+              const addBtn = document.createElement("button");
+              addBtn.classList.add("btn");
+              addBtn.textContent = "+";
+              addBtn.addEventListener("click", function () {
+                // Add functionality to add button here
+                const newNodeName = prompt("Enter the name of the new node:");
+                if (newNodeName) {
+                  const newListItem = document.createElement("li");
+                  const newSpan = document.createElement("span");
+                  newSpan.textContent = newNodeName;
+                  newListItem.appendChild(newSpan);
+
+                  const newUl = document.createElement("ul");
+                  newUl.addClass = "pri";
+                  console.log(newUl);
+                  newListItem.appendChild(newUl);
+                  // Append the new list item to the clicked node
+                  event.target.nextElementSibling.appendChild(newListItem);
+                  // Save tree structure after modification
+                  saveTree();
+                  window.location.reload();
+
+                }
+              });
+
+              // Append button to the button group
+              btnGroup.appendChild(addBtn);
+
+              // Append button group after the clicked tree node's span element
+              event.target.appendChild(btnGroup);
+
+              // Save tree structure after modification
+              saveTree();
+            } else {
+              // Create button group for add, delete, and move options
+              const btnGroup = document.createElement("div");
+              btnGroup.classList.add("btn-group");
+
+              // Add buttons for add, delete, and move
+              const addBtn = document.createElement("button");
+              addBtn.classList.add("btn");
+              addBtn.textContent = "➕";
+              addBtn.addEventListener("click", function () {
+                // Add functionality to add button here
+                const newNodeName = prompt("Enter the name of the new node:");
+                if (newNodeName) {
+                  const newListItem = document.createElement("li");
+                  const newSpan = document.createElement("span");
+                  newSpan.textContent = newNodeName;
+                  newListItem.appendChild(newSpan);
+
+                  const newUl = document.createElement("ul");
+                  newListItem.appendChild(newUl);
+
+                  // Get the parent ul of the clicked button
+                  const parentLi = event.target.parentElement;
+                  const parentUl = parentLi.querySelector("ul");
+
+                  if (parentUl) {
+                    parentUl.appendChild(newListItem);
+                  } else {
+                    // If parent ul doesn't exist, create a new one and append the new list item to the parent li
+                    const newParentUl = document.createElement("ul");
+                    parentLi.appendChild(newParentUl);
+                    newParentUl.appendChild(newListItem);
+                  }
+
+                  // Save tree structure after modification
+                  saveTree();
+                  window.location.reload();
+                }
+              });
+
+              const deleteBtn = document.createElement("button");
+              deleteBtn.classList.add("btn");
+              deleteBtn.textContent = "➖";
+              deleteBtn.addEventListener("click", function () {
+                // Add functionality to delete button here
+                const parentLi = this.parentElement.parentElement.parentElement;
+                console.log(parentLi);
+
+                // Remove the parent <li> element, which contains the <ul> and its children
+                parentLi.remove();
+
+                // Save tree structure after modification
+                saveTree();
+              });
+              
+              const mergeBtn = document.createElement("button");
+              mergeBtn.classList.add("btn");
+              mergeBtn.textContent = "🔁";
+              mergeBtn.addEventListener("click", function () {
+    // Prompt the user to enter the name of the node they want to merge with
+    const mergeNodeName = prompt("Enter the name of the node to merge with:");
+    
+    if (mergeNodeName) {
+        // Find the node to merge with
+        const mergeNode = findNodeByContent(document.getElementById('tree'), mergeNodeName);
+        
+        if (mergeNode) {
+            // Move child nodes from the mergeNode to the clicked node
+            const clickedNode = this.parentElement.parentElement.parentElement;
+            const clickedNodeUl = clickedNode.querySelector("ul");
+            const mergeNodeUl = mergeNode.querySelector("ul");
+
+            if (clickedNodeUl && mergeNodeUl) {
+                while (mergeNodeUl.firstChild) {
+                    clickedNodeUl.appendChild(mergeNodeUl.firstChild);
+                }
+            }
+            
+            // Remove the mergeNode from the tree
+            mergeNode.remove();
+
+            // Save tree structure after modification
+            saveTree();
+        } else {
+            alert("Node to merge with not found!");
+        }
+    }
+});
+
+              // Create move button
+              const moveBtn = document.createElement("button");
+              moveBtn.classList.add("btn");
+              moveBtn.textContent = "⏩";
+              moveBtn.addEventListener("click", function () {
+                // Add functionality to move button here
+                const newNodeName = prompt(
+                  "Enter the name of the destination node:"
+                );
+                if (newNodeName) {
+                  const destinationNode = findNodeByContent(
+                    document.getElementById("tree"),
+                    newNodeName
+                  );
+                  console.log(destinationNode);
+                  if (destinationNode) {
+                    const nodeToMove =
+                      this.parentElement.parentElement.parentElement;
+                    console.log(nodeToMove);
+                    const destinationUl = destinationNode.querySelector("ul");
+                    if (destinationUl) {
+                      destinationUl.appendChild(nodeToMove);
+                    } else {
+                      const newUl = document.createElement("ul");
+                      destinationNode.appendChild(newUl);
+                      newUl.appendChild(nodeToMove);
+                    }
+                    saveTree(); // Save tree structure after modification
+                  } else {
+                    alert("Destination node not found!");
+                  }
+                }
+              });
+              // Append buttons to the button group
+              btnGroup.appendChild(addBtn);
+              btnGroup.appendChild(deleteBtn);
+              btnGroup.appendChild(moveBtn);
+              btnGroup.appendChild(mergeBtn);
+
+              // Append button group after the clicked tree node's span element
+              event.target.appendChild(btnGroup);
+
+              // Save tree structure after modification
+              saveTree();
+            }
+          });
+        });
+      });
+
+      function findNodeByContent(startNode, content) {
+        const childNodes = startNode.querySelectorAll("span");
+        for (let i = 0; i < childNodes.length; i++) {
+          if (childNodes[i].textContent.trim() === content) {
+            return childNodes[i].parentElement;
+          }
+        }
+        return null;
+      }
+    </script>
+  </body>
+</html>

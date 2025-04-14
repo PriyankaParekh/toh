@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower of Hanoi</title>
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          flex-direction: column;
+        }
+
+        .towerOfHanoi {
+          display: flex;
+          flex-direction: row;
+          height: 400px;
+          width: 1200px;
+          margin-top: 2em;
+        }
+
+        .tower1,
+        .tower2,
+        .tower3 {
+          /* background-color: rgb(173, 230, 225); */
+          flex-grow: 1;
+          position: relative;
+          display: flex;
+          align-items: flex-end;
+        }
+
+        .stick {
+          height: 90%;
+          width: 10px;
+          background-color: grey;
+          margin: 0 auto;
+        }
+
+        .disk {
+          height: 20px;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          margin: auto;
+          z-index: 10;
+          transition: bottom 250ms ease-in-out, transform 250ms ease-in-out;
+        }
+        .pri{
+            margin-right: 40px;
+            width: 65rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form class="mb-3 d-flex">
+            <input type="number" class="form-control number pri" placeholder="Enter Number Of Plates" required>
+            <button class="btn btn-primary submit" type="submit">START</button>
+            <button class="btn btn-danger restart ms-3" type="button">RESTART</button>
+        </form>
+         <div class="towerOfHanoi">
+            <div class="tower1">
+                <div class="stick"></div>
+            </div>
+            <div class="tower2">
+                <div class="stick"></div>
+            </div>
+            <div class="tower3">
+                <div class="stick"></div>
+            </div>
+        </div>
+        <div class="widthh w-100 h-25 bg-warning"></div>
+        <h6 class="d-flex justify-content-center mt-3">TOTAL MOVES: <span class="totalMoves">0</span></h6>
+
+    </div>
+
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+ 
+    <script>
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+        let totalMoves = 0;
+
+        //get submit values
+        const submit = document.querySelector('.submit');
+        const restart = document.querySelector('.restart');
+        var numberInput = document.querySelector('.number');
+        const tower1 = document.querySelector('.tower1');
+        // Select total moves span
+        const totalMovesSpan = document.querySelector('.totalMoves');
+
+        restart.addEventListener('click', ()=>{
+            window.location.reload();
+        })
+        submit.addEventListener('click', (e) => {
+            const number = parseInt(numberInput.value);
+            towerOfHanoi(number);
+            submit.setAttribute('disabled', 'true')
+            numberInput.value = "";
+            e.preventDefault();
+        });
+
+        //start the game
+        async function towerOfHanoi(number) {
+            const a = [];
+            const b = [];
+            const c = [];
+            let i = number;
+
+            //fill first tower with disks equal to number input
+            for (i; i > 0; i--) {
+                a.push(i);
+            }
+
+            // create the disks
+            a.forEach((item) => {
+                element = document.createElement("div");
+                element.className = "disk d-flex justify-content-center align-items-center border";
+                element.setAttribute("id", item);
+                const style = {
+                    width: 200 / (number) * item + "px", //400/4
+                    bottom: a.indexOf(item) * 20 + "px",
+                    background: "#ffa8B6",
+                    transform: "translateX(0px)"
+                };
+                element.textContent=item;
+                Object.assign(element.style, style);
+                tower1.appendChild(element);
+            });
+
+            // this moves the disks
+            if (number % 2 != 0) {
+                while (c.length < number) {
+                    await moveDisk(a, c, c, number, 2);
+                    await moveDisk(a, b, c, number, 1);
+                    await moveDisk(b, c, c, number, 1);
+                }
+            } else {
+                while (c.length < number) {
+                    await moveDisk(a, b, c, number, 1);
+                    await moveDisk(a, c, c, number, 2);
+                    await moveDisk(b, c, c, number, 1);
+                }
+            }
+        };
+
+        // move disk function, parameters are start, destination, finish peg and distance between start and destination
+        async function moveDisk(a, b, c, number, distance) {
+            if (c.length == number) return;
+
+            if (!a.length && b.length) {
+                await draw(b, a, distance * -1);
+                a.push(b[b.length - 1]);
+                b.pop();
+            } else if (!b.length && a.length) {
+                await draw(a, b, distance);
+                b.push(a[a.length - 1]);
+                a.pop();
+
+            } else {
+                if (a[a.length - 1] < b[b.length - 1]) {
+                    while (a[a.length - 1] < b[b.length - 1]) {
+                        await draw(a, b, distance);
+                        b.push(a[a.length - 1]);
+                        a.pop();
+                    }
+
+                } else if (b[b.length - 1] < a[a.length - 1]) {
+                    while (b[b.length - 1] < a[a.length - 1]) {
+                        await draw(b, a, distance * -1);
+                        a.push(b[b.length - 1]);
+                        b.pop();
+                    }
+                }
+            }
+            // Increment total moves and update the display
+            totalMoves++;
+            totalMovesSpan.textContent = totalMoves;
+        };
+
+        //moving function: this should animate the disks
+        async function draw(a, b, distance) {
+            num = a[a.length - 1].toString();
+            disk = document.getElementById(num);
+
+            //get current translateX css value and then add the distance between start and destination peg
+            regEx = /\.*translateX\((.*)px\)/i;
+            translate = disk.getAttribute('style')
+            value = parseInt(regEx.exec(translate)[1]) + (distance * 400);
+
+            //move disk up 
+            disk.style.bottom = "385px";
+            await delay(250);
+            //move disk to the destination peg
+            disk.style.transform = "translateX(" + value + "px)";
+            await delay(250);
+            //drop disk
+            disk.style.bottom = b.length * 20 + "px";
+            await delay(250);
+        };
+    </script>
+</body>
+</html>
